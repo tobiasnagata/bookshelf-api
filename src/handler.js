@@ -81,20 +81,18 @@ const addBookHandler = (request, h) => {
 
 const getAllBooksHandler = (request, h) => {
   const { name, reading, finished } = request.query;
-
-  let book = [];
+  console.log(books)
+  let book = {};
   if (name) {
-    book.push(
-      books.filter((item) => item.name.toLowerCase() === name.toLowerCase())[0],
-    );
+    book = books.filter((item) => item.name.toLowerCase() === name.toLowerCase());
   }
   if (reading) {
     const val = parseInt(reading, 2) === 1;
-    book.push(books.filter((item) => item.reading === val)[0]);
+    book = books.filter((item) => item.reading === val);
   }
   if (finished) {
     const val = parseInt(finished, 2) === 1;
-    book.push(books.filter((item) => item.finished === val)[0]);
+    book = books.filter((item) => item.finished === val);
   }
   if (!name && !reading && !finished) {
     book = books;
@@ -103,7 +101,11 @@ const getAllBooksHandler = (request, h) => {
   const response = h.response({
     status: 'success',
     data: {
-      book,
+      books: book.map((item) => ({
+        id: item.id,
+        name: item.name,
+        publisher: item.publisher,
+      })),
     },
   });
   response.code(200);
@@ -125,7 +127,7 @@ const getBookByIdHandler = (request, h) => {
   }
   const response = h.response({
     status: 'fail',
-    message: 'Catatan tidak ditemukan',
+    message: 'Buku tidak ditemukan',
   });
   response.code(404);
   return response;
@@ -144,6 +146,7 @@ const editBookByIdHandler = (request, h) => {
     reading,
   } = request.payload;
   const updatedAt = new Date().toISOString();
+  const finished = pageCount === readPage;
 
   // response if client doesn't input name parameter
   if (!name) {
@@ -178,6 +181,7 @@ const editBookByIdHandler = (request, h) => {
       publisher,
       pageCount,
       readPage,
+      finished,
       reading,
       updatedAt,
     };
